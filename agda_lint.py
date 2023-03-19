@@ -7,15 +7,11 @@ from antlr4.InputStream import InputStream
 # from YourAgdaLexer import YourAgdaLexer
 # from YourAgdaParser import YourAgdaParser
 
-
-class AgdaCodeRenderer(mistune.AstRenderer):
-    def __init__(self):
-        super().__init__()
-
-    def block_code(self, code, lang):
+class AgdaCodeRenderer(mistune.HTMLRenderer):
+    def block_code(self, text, lang=None):
         if lang == 'agda':
-            return self.parse_agda(code)
-        return ''
+            return self.parse_agda(text)
+        return super().block_code(text, lang)
 
     def parse_agda(self, code):
         # Implement your ANTLR Agda parser here
@@ -30,7 +26,6 @@ class AgdaCodeRenderer(mistune.AstRenderer):
         # Analyze the parse tree and return any issues found
         return "Issues found in the Agda code"
 
-
 def main():
     if len(sys.argv) < 2:
         print("Usage: python agda_lint.py <input_file>")
@@ -42,11 +37,10 @@ def main():
         content = file.read()
 
     renderer = AgdaCodeRenderer()
-    markdown = mistune.Markdown(renderer=renderer)
+    markdown = mistune.create_markdown(renderer=renderer, plugins=["strikethrough", "table", "url"])
 
     issues = markdown(content)
     print(issues)
-
 
 if __name__ == "__main__":
     main()
